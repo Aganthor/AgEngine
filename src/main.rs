@@ -7,7 +7,6 @@ use ggez::timer;
 
 use std::env;
 use std::path;
-use std::fs;
 
 struct MyGame {
 
@@ -31,10 +30,10 @@ impl EventHandler for MyGame {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::WHITE);
 
-        for x in 1..10 {
+/*        for x in 1..10 {
             let my_dest = ggez::nalgebra::Point2::new(x as f32 * 32.0, 20.0);
-//            graphics::draw(ctx, &self.grass, DrawParam::default().dest(my_dest))?;
-        }
+            graphics::draw(ctx, &self.grass, DrawParam::default().dest(my_dest))?;
+        }*/
 
         graphics::present(ctx)
     }
@@ -48,12 +47,12 @@ fn main() {
     } else {
         path::PathBuf::from("./assets/tiles")
     };
-
+/*
     let textures_path = fs::read_dir("./assets/tiles").unwrap();
     for file in textures_path {
         println!("{}", file.unwrap().path().display());
     }
-        
+*/        
     let (mut ctx, mut event_loop) = ContextBuilder::new("AgEngine", "Luc Bergeron")
         .add_resource_path(resource_dir)
         .build()
