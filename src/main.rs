@@ -7,24 +7,18 @@ use ggez::timer;
 
 use std::env;
 use std::path;
-
-mod map;
-use map::map::Map;
+use std::fs;
 
 struct MyGame {
-    world_map: Map,
+
 }
 
 impl MyGame {
     fn new(ctx: &mut Context) -> MyGame {
 //        let grass_file = graphics::Image::new(ctx, "/grass.png").unwrap();
 
-        let map = Map::new()
-            .generate_map();
-
         MyGame {
 //            grass: grass_file,
-            world_map: map,
         }
     }
 }
@@ -55,6 +49,11 @@ fn main() {
         path::PathBuf::from("./assets/tiles")
     };
 
+    let textures_path = fs::read_dir("./assets/tiles").unwrap();
+    for file in textures_path {
+        println!("{}", file.unwrap().path().display());
+    }
+        
     let (mut ctx, mut event_loop) = ContextBuilder::new("AgEngine", "Luc Bergeron")
         .add_resource_path(resource_dir)
         .build()
