@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'minecraft'",
+            "name": "Debug executable 'agengine'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=minecraft",
-                    "--package=minecraft"
+                    "--bin=agengine",
+                    "--package=agengine"
                 ],
                 "filter": {
-                    "name": "minecraft",
+                    "name": "agengine",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'minecraft'",
+            "name": "Debug unit tests in executable 'agengine'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=minecraft",
-                    "--package=minecraft"
+                    "--bin=agengine",
+                    "--package=mineagenginecraft"
                 ],
                 "filter": {
-                    "name": "minecraft",
+                    "name": "agengine",
                     "kind": "bin"
                 }
             },
