@@ -8,6 +8,9 @@ use ggez::timer;
 use std::env;
 use std::path;
 
+mod map;
+use map::textures;
+
 struct MyGame {
 
 }
@@ -52,13 +55,17 @@ fn main() {
     for file in textures_path {
         println!("{}", file.unwrap().path().display());
     }
-*/        
+*/   
+    
     let (mut ctx, mut event_loop) = ContextBuilder::new("AgEngine", "Luc Bergeron")
         .add_resource_path(resource_dir)
         .build()
         .expect("Could not create ggez context...");
 
     let mut my_game = MyGame::new(&mut ctx);
+
+    let t = textures::TextureLoader::new();
+    t.load_textures(&mut ctx);
 
     match event::run(&mut ctx, &mut event_loop, &mut my_game) {
         Ok(_) => println!("Exited cleanly!"),
