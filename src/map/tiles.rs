@@ -11,6 +11,14 @@ pub enum TileType {
     None,
 }
 
+// impl Into<u32> for TileType {
+//     fn into(self) -> u32 {
+//         match self {
+//             TileType::DeepWater => 
+//         }
+//     }
+// }
+
 pub struct TileInfo {
     x: i32,
     y: i32,

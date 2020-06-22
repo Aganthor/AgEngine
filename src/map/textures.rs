@@ -24,6 +24,8 @@ impl TextureLoader {
              let mut filename = item.into_os_string().into_string().unwrap();
              filename.retain(|c| c != '/');
              println!("{}", filename);
+             let mut texture = graphics::Image::new(ctx, filename.to_string()).unwrap();
+             //self.textures.insert()
          }
     }
 }
