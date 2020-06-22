@@ -42,3 +42,46 @@ impl Map {
         let _ = img.save("map.bmp");
     }
 }
+
+
+/*
+#[derive(Debug, Eq, PartialEq)]
+struct Foo {
+    value: usize,
+}
+
+struct FooBuilder {
+    foos: usize,
+    bars: usize,
+}
+
+impl FooBuilder {
+    fn new() -> FooBuilder {
+        FooBuilder {
+            foos: 0,
+            bars: 0,
+        }
+    }
+    fn set_foos(mut self, foos: usize) -> FooBuilder {
+        self.foos = foos;
+        self
+    }
+    fn set_bars(mut self, bars: usize) -> FooBuilder {
+        self.bars = bars;
+        self
+    }
+    fn build(&self) -> Foo {
+        Foo {
+            value: self.foos + self.bars,
+        }
+    }
+}
+
+fn main() {
+    let foo = FooBuilder::new()
+        .set_foos(2)
+        .set_bars(3)
+        .build();
+    assert_eq!(foo, Foo { value: 5 });
+}
+*/

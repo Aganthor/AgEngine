@@ -1,17 +1,18 @@
 use ggez;
 
-use ggez::{filesystem, ContextBuilder, GameResult, Context};
+use ggez::{filesystem, Context, graphics};
 use std::collections::HashMap;
-//use tiles;
+use super::tiles;
 
 pub struct TextureLoader {
-    //textures: HashMap
+    textures: HashMap<tiles::TileType, graphics::Image>
 }
 
 impl TextureLoader {
     pub fn new() -> TextureLoader {
+        let texture_map: HashMap<tiles::TileType, graphics::Image> = HashMap::new();
         TextureLoader {
-            //textures: HashMap::new()
+            textures: texture_map
         }
     }
 
@@ -20,7 +21,9 @@ impl TextureLoader {
          //self.textures.insert(tiles::TileType::Grass, texture_file);
          let dir_content: Vec<_> = filesystem::read_dir(ctx, "/").unwrap().collect();
          for item in dir_content {
-             let filename    = item.into_os_string();
+             let mut filename = item.into_os_string().into_string().unwrap();
+             filename.retain(|c| c != '/');
+             println!("{}", filename);
          }
     }
 }
