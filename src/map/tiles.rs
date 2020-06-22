@@ -1,4 +1,6 @@
 pub const TILE_SIZE: u32 = 32;
+
+#[derive(Hash, PartialEq, Eq)]
 pub enum TileType {
     DeepWater,
     Dirt,
@@ -11,13 +13,21 @@ pub enum TileType {
     None,
 }
 
-// impl Into<u32> for TileType {
-//     fn into(self) -> u32 {
-//         match self {
-//             TileType::DeepWater => 
-//         }
-//     }
-// }
+impl From<&str> for TileType {
+    fn from(tile_type: &str) -> Self {
+        match tile_type {
+            "deep_water.png" => TileType::DeepWater,
+            "dirt.png" => TileType::Dirt,
+            "grass.png" => TileType::Grass,
+            "rock.png" => TileType::Rock,
+            "sand.png" => TileType::Sand,
+            "shallow_water.png" => TileType::ShallowWater,
+            "shore.png" => TileType::Shore,
+            "snow.png" => TileType::Snow,
+            _ => TileType::None
+        }
+    }
+}
 
 pub struct TileInfo {
     x: i32,
