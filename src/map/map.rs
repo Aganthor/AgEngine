@@ -3,6 +3,9 @@ use simdnoise::*;
 use ggez::graphics::{Color, DrawMode, DrawParam, Drawable, BlendMode, Rect};
 use ggez::Context;
 use ggez::GameResult;
+use ggez::nalgebra::Point2;
+use rand::prelude::*;
+use std::f32::{MIN, MAX};
 
 use super::tiles;
 
@@ -65,7 +68,9 @@ impl MapBuilder {
             noise_lacunarity: self.lacunarity,
             noise_gain: self.gain,
             noise_octaves: self.octaves,
+            noise_scale: 1.0,
             map_size: self.map_size,
+            offset: Point2::new(self.map_size as f32 / 2.0, self.map_size as f32 / 2.0),
         }
     }
 }
@@ -81,7 +86,9 @@ pub struct Map {
     noise_lacunarity: f32,
     noise_gain: f32,
     noise_octaves: u8,
-    map_size:  usize
+    noise_scale: f32,
+    map_size:  usize,
+    offset: Point2<f32>,
 }
 
 impl Map {
@@ -98,6 +105,43 @@ impl Map {
             .with_gain(2.5)
             .with_octaves(2)
             .generate_scaled(0.0, 1.0);*/
+
+            let mut rng = thread_rng();
+
+            let mut octave_offsets: Vec<Point2<f32>> = Vec::new();
+            octave_offsets.resize(self.noise_octaves as usize, Point2::new(0.0, 0.0));
+
+            for i in 0..self.noise_octaves as usize {
+                //rng.gen_range(-10.0, 10.0);
+                let mut offset_x = rng.gen_range(-10000.0, 10000.0) + self.offset.x;
+                let mut offset_y = rng.gen_range(-10000.0, 10000.0) + self.offset.y;
+                octave_offsets[i].x = offset_x;
+                octave_offsets[i].y = offset_y;
+            }
+
+            if self.noise_scale <= 0.0 {
+                self.noise_scale = 0.0001;
+            }
+
+            let max_noise_height = std::f32::MAX;
+            let min_noise_height = std::f32::MIN;
+            let half_width: f32 = self.map_size as f32 / 2.0;
+            let half_height: f32 = self.map_size as f32 / 2.0;
+
+            for y in 0..self.map_size {
+                for x in 0..self.map_size {
+                    let mut amplitude = 1.0;
+                    let mut frequency = 1.0;
+                    let mut noise_height = 0.0;
+
+                    for i in 0..self.noise_octaves as usize {
+                        let sample_x = (x as f32 - half_width) / self.noise_scale * frequency + octave_offsets[i].x;
+                        let sample_y = (y as f32 - half_height) / self.noise_scale * frequency + octave_offsets[i].y;
+
+                        //let noise_value = self.noise_vector.
+                    }
+                }
+            }
     }
 
     #[allow(dead_code)]
