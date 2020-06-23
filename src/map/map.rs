@@ -1,27 +1,103 @@
 use bmp::Image;
 use simdnoise::*;
+use ggez::graphics::{Color, DrawMode, DrawParam, Drawable, BlendMode, Rect};
+use ggez::Context;
+use ggez::GameResult;
 
-pub struct Map {
-    noise_vector: Vec<f32>,
-    map_size: usize,
+use super::tiles;
+
+struct MapBuilder {
+    seed: i32,
+    frequency: f32,
+    lacunarity: f32,
+    gain: f32,
+    octaves: u8,
+    map_size:  usize,
 }
 
-impl Map {
-    pub fn new(size: usize) -> Map {
-        Map {
-            noise_vector: Vec::new(),
-            map_size: size,
+impl MapBuilder {
+    fn new() -> MapBuilder {
+        MapBuilder {
+            seed: 0,
+            frequency: 0.0,
+            lacunarity: 0.0,
+            gain: 0.0,
+            octaves: 0,
+            map_size: 0
         }
     }
 
+    fn with_seed(mut self, seed: i32) -> MapBuilder {
+        self.seed = seed;
+        self
+    }
+
+    fn with_frequency(mut self, freq: f32) -> MapBuilder {
+        self.frequency = freq;
+        self
+    }
+
+    fn with_lacunarity(mut self, lacunarity: f32) -> MapBuilder {
+        self.lacunarity = lacunarity;
+        self
+    }
+
+    fn with_gain(mut self, gain: f32) -> MapBuilder {
+        self.gain = gain;
+        self
+    }
+
+    fn with_octaves(mut self, octaves: u8) -> MapBuilder {
+        self.octaves = octaves;
+        self
+    }
+
+    fn with_size(mut self, size: usize) -> MapBuilder {
+        self.map_size = size;
+        self
+    }
+
+    fn build(&self) -> Map {
+        Map {
+            noise_vector: Vec::new(),
+            noise_seed: self.seed,
+            noise_frequency: self.frequency,
+            noise_lacunarity: self.lacunarity,
+            noise_gain: self.gain,
+            noise_octaves: self.octaves,
+            map_size: self.map_size,
+        }
+    }
+}
+
+struct LevelData {
+    level_data: Vec<tiles::TileInfo>,
+}
+
+pub struct Map {
+    noise_vector: Vec<f32>,
+    noise_seed: i32,
+    noise_frequency: f32,
+    noise_lacunarity: f32,
+    noise_gain: f32,
+    noise_octaves: u8,
+    map_size:  usize
+}
+
+impl Map {
     pub fn generate_map(&mut self) {
         self.noise_vector = NoiseBuilder::fbm_2d(self.map_size, self.map_size)
-            .with_seed(1337322)
-            .with_freq(0.03)
+            .with_seed(self.noise_seed)
+            .with_freq(self.noise_frequency)
+            .with_lacunarity(self.noise_lacunarity)
+            .with_gain(self.noise_gain)
+            .with_octaves(self.noise_octaves)
+            .generate_scaled(0.0, 1.0);
+/*            .with_freq(0.03)
             .with_lacunarity(0.55)
             .with_gain(2.5)
             .with_octaves(2)
-            .generate_scaled(0.0, 1.0);
+            .generate_scaled(0.0, 1.0);*/
     }
 
     #[allow(dead_code)]
@@ -43,45 +119,24 @@ impl Map {
     }
 }
 
-
-/*
-#[derive(Debug, Eq, PartialEq)]
-struct Foo {
-    value: usize,
-}
-
-struct FooBuilder {
-    foos: usize,
-    bars: usize,
-}
-
-impl FooBuilder {
-    fn new() -> FooBuilder {
-        FooBuilder {
-            foos: 0,
-            bars: 0,
-        }
+impl Drawable for Map {
+    fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
+/*        for x in 1..10 {
+            let my_dest = ggez::nalgebra::Point2::new(x as f32 * 32.0, 20.0);
+            graphics::draw(ctx, &self.grass, DrawParam::default().dest(my_dest))?;
+        }*/        
+        Ok(())
     }
-    fn set_foos(mut self, foos: usize) -> FooBuilder {
-        self.foos = foos;
-        self
+
+    fn dimensions(&self, ctx: &mut Context) -> Option<Rect> {
+        Some(Rect::new(0.0, 0.0, self.map_size as f32, self.map_size as f32))
     }
-    fn set_bars(mut self, bars: usize) -> FooBuilder {
-        self.bars = bars;
-        self
+
+    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {
+        
     }
-    fn build(&self) -> Foo {
-        Foo {
-            value: self.foos + self.bars,
-        }
+
+    fn blend_mode(&self) -> Option<BlendMode> {
+        Some(BlendMode::Alpha)
     }
 }
-
-fn main() {
-    let foo = FooBuilder::new()
-        .set_foos(2)
-        .set_bars(3)
-        .build();
-    assert_eq!(foo, Foo { value: 5 });
-}
-*/
