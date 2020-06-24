@@ -1,9 +1,9 @@
 use ggez;
 use ggez::event::{self, EventHandler};
-use ggez::{graphics, Context, ContextBuilder, GameResult};
 use ggez::graphics::{Color, DrawMode, DrawParam};
 use ggez::nalgebra::Point2;
 use ggez::timer;
+use ggez::{graphics, Context, ContextBuilder, GameResult};
 
 use std::env;
 use std::path;
@@ -11,14 +11,11 @@ use std::path;
 mod map;
 use map::map::Map;
 
-struct MyGame {
-
-}
+struct MyGame {}
 
 impl MyGame {
     fn new(ctx: &mut Context) -> MyGame {
-        MyGame {
-        }
+        MyGame {}
     }
 }
 
@@ -42,7 +39,7 @@ fn main() {
     } else {
         path::PathBuf::from("./assets/tiles")
     };
-    
+
     let (mut ctx, mut event_loop) = ContextBuilder::new("AgEngine", "Luc Bergeron")
         .add_resource_path(resource_dir)
         .build()

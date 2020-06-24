@@ -1,13 +1,13 @@
 use bmp::Image;
-use simdnoise::*;
-use ggez::graphics::{Color, DrawMode, DrawParam, Drawable, BlendMode, Rect};
+use ggez::graphics::{BlendMode, Color, DrawMode, DrawParam, Drawable, Rect};
+use ggez::nalgebra::Point2;
 use ggez::Context;
 use ggez::GameResult;
-use ggez::nalgebra::Point2;
 use rand::prelude::*;
-use std::f32::{MIN, MAX};
+use simdnoise::*;
+use std::f32::{MAX, MIN};
 
-use super::tiles;
+use super::tiles::{TileInfo, TileType};
 
 struct MapBuilder {
     seed: i32,
@@ -15,7 +15,7 @@ struct MapBuilder {
     lacunarity: f32,
     gain: f32,
     octaves: u8,
-    map_size:  usize,
+    map_size: usize,
 }
 
 impl MapBuilder {
@@ -26,7 +26,7 @@ impl MapBuilder {
             lacunarity: 0.0,
             gain: 0.0,
             octaves: 0,
-            map_size: 0
+            map_size: 0,
         }
     }
 
@@ -61,34 +61,39 @@ impl MapBuilder {
     }
 
     fn build(&self) -> Map {
+        let mut map_data: Vec<f32> = Vec::new();
+        map_data.resize(self.map_size * self.map_size, 0.0);
         Map {
             noise_vector: Vec::new(),
+            map_data: map_data,
             noise_seed: self.seed,
             noise_frequency: self.frequency,
             noise_lacunarity: self.lacunarity,
             noise_gain: self.gain,
             noise_octaves: self.octaves,
             noise_scale: 1.0,
+            noise_persistance: 0.5,
             map_size: self.map_size,
             offset: Point2::new(self.map_size as f32 / 2.0, self.map_size as f32 / 2.0),
+            level_data: Vec::new(),
         }
     }
 }
 
-struct LevelData {
-    level_data: Vec<tiles::TileInfo>,
-}
 
 pub struct Map {
     noise_vector: Vec<f32>,
+    map_data: Vec<f32>,
     noise_seed: i32,
     noise_frequency: f32,
     noise_lacunarity: f32,
     noise_gain: f32,
     noise_octaves: u8,
     noise_scale: f32,
-    map_size:  usize,
+    noise_persistance: f32,
+    map_size: usize,
     offset: Point2<f32>,
+    level_data: Vec<TileInfo>,
 }
 
 impl Map {
@@ -100,48 +105,90 @@ impl Map {
             .with_gain(self.noise_gain)
             .with_octaves(self.noise_octaves)
             .generate_scaled(0.0, 1.0);
-/*            .with_freq(0.03)
-            .with_lacunarity(0.55)
-            .with_gain(2.5)
-            .with_octaves(2)
-            .generate_scaled(0.0, 1.0);*/
+        /*            .with_freq(0.03)
+        .with_lacunarity(0.55)
+        .with_gain(2.5)
+        .with_octaves(2)
+        .generate_scaled(0.0, 1.0);*/
 
-            let mut rng = thread_rng();
+        let mut rng = thread_rng();
 
-            let mut octave_offsets: Vec<Point2<f32>> = Vec::new();
-            octave_offsets.resize(self.noise_octaves as usize, Point2::new(0.0, 0.0));
+        let mut octave_offsets: Vec<Point2<f32>> = Vec::new();
+        octave_offsets.resize(self.noise_octaves as usize, Point2::new(0.0, 0.0));
 
-            for i in 0..self.noise_octaves as usize {
-                //rng.gen_range(-10.0, 10.0);
-                let mut offset_x = rng.gen_range(-10000.0, 10000.0) + self.offset.x;
-                let mut offset_y = rng.gen_range(-10000.0, 10000.0) + self.offset.y;
-                octave_offsets[i].x = offset_x;
-                octave_offsets[i].y = offset_y;
+        for i in 0..self.noise_octaves as usize {
+            //rng.gen_range(-10.0, 10.0);
+            let mut offset_x = rng.gen_range(-10000.0, 10000.0) + self.offset.x;
+            let mut offset_y = rng.gen_range(-10000.0, 10000.0) + self.offset.y;
+            octave_offsets[i].x = offset_x;
+            octave_offsets[i].y = offset_y;
+        }
+
+        if self.noise_scale <= 0.0 {
+            self.noise_scale = 0.0001;
+        }
+
+        let mut max_noise_height = std::f32::MAX;
+        let mut min_noise_height = std::f32::MIN;
+        let half_width: f32 = self.map_size as f32 / 2.0;
+        let half_height: f32 = self.map_size as f32 / 2.0;
+
+        for y in 0..self.map_size {
+            for x in 0..self.map_size {
+                let mut amplitude = 1.0;
+                let mut frequency = 1.0;
+                let mut noise_height = 0.0;
+
+                for i in 0..self.noise_octaves as usize {
+                    let sample_x = (x as f32 - half_width) / self.noise_scale * frequency + octave_offsets[i].x;
+                    let sample_y = (y as f32 - half_height) / self.noise_scale * frequency + octave_offsets[i].y;
+
+                    let noise_value = self.noise_vector[sample_x as usize * self.map_size + sample_y as usize] * 2.0 - 1.0;
+                    noise_height += noise_value * amplitude;
+
+                    amplitude *= self.noise_persistance;
+                    frequency *= self.noise_lacunarity;
+                }
+
+                if noise_height > max_noise_height {
+                    max_noise_height = noise_height;
+                } else if noise_height < min_noise_height {
+                    min_noise_height = noise_height;
+                }
+                self.map_data[y * self.map_size + x] = noise_height;
             }
+        }
 
-            if self.noise_scale <= 0.0 {
-                self.noise_scale = 0.0001;
+        for y in 0..self.map_size {
+            for x in 0..self.map_size {
+                self.map_data[y * self.map_size + x] = inverselerp(min_noise_height, max_noise_height, self.map_data[y * self.map_size + x]);
             }
+        }
+    }
 
-            let max_noise_height = std::f32::MAX;
-            let min_noise_height = std::f32::MIN;
-            let half_width: f32 = self.map_size as f32 / 2.0;
-            let half_height: f32 = self.map_size as f32 / 2.0;
-
-            for y in 0..self.map_size {
-                for x in 0..self.map_size {
-                    let mut amplitude = 1.0;
-                    let mut frequency = 1.0;
-                    let mut noise_height = 0.0;
-
-                    for i in 0..self.noise_octaves as usize {
-                        let sample_x = (x as f32 - half_width) / self.noise_scale * frequency + octave_offsets[i].x;
-                        let sample_y = (y as f32 - half_height) / self.noise_scale * frequency + octave_offsets[i].y;
-
-                        //let noise_value = self.noise_vector.
-                    }
+    pub fn generate_level(&mut self) {
+        for y in 0..self.map_size {
+            for x in 0..self.map_size {
+                let map_value = self.map_data[y * self.map_size + x];
+                if map_value >= -1.0 && map_value < -0.25 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::DeepWater));
+                } else if map_value >= -0.25 && map_value < 0.0 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::ShallowWater));
+                } else if map_value >= 0.0 && map_value < 0.0625 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::Shore));
+                } else if map_value >= 0.0625 && map_value < 0.1250 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::Sand));
+                } else if map_value >= 0.1250 && map_value < 0.3750 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::Grass));
+                } else if map_value >= 0.3750 && map_value < 0.75 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::Dirt));
+                } else if map_value >= 0.75 && map_value < 1.0 {
+                    self.level_data.push(TileInfo::new(x, y, TileType::Rock));
+                } else {
+                    self.level_data.push(TileInfo::new(x, y, TileType::Snow));
                 }
             }
+        }
     }
 
     #[allow(dead_code)]
@@ -163,22 +210,27 @@ impl Map {
     }
 }
 
+#[inline]
+fn inverselerp(x: f32, y: f32, value: f32) -> f32 {
+    (value - x) / (y - x)
+}
+
 impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
-/*        for x in 1..10 {
-            let my_dest = ggez::nalgebra::Point2::new(x as f32 * 32.0, 20.0);
-            graphics::draw(ctx, &self.grass, DrawParam::default().dest(my_dest))?;
-        }*/        
+
         Ok(())
     }
 
     fn dimensions(&self, ctx: &mut Context) -> Option<Rect> {
-        Some(Rect::new(0.0, 0.0, self.map_size as f32, self.map_size as f32))
+        Some(Rect::new(
+            0.0,
+            0.0,
+            self.map_size as f32,
+            self.map_size as f32,
+        ))
     }
 
-    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {
-        
-    }
+    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {}
 
     fn blend_mode(&self) -> Option<BlendMode> {
         Some(BlendMode::Alpha)

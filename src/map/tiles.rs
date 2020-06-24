@@ -24,30 +24,29 @@ impl From<&str> for TileType {
             "shallow_water.png" => TileType::ShallowWater,
             "shore.png" => TileType::Shore,
             "snow.png" => TileType::Snow,
-            _ => TileType::None
+            _ => TileType::None,
         }
     }
 }
 
 pub struct TileInfo {
-    x: i32,
-    y: i32,
+    x: usize,
+    y: usize,
     tile_type: TileType,
     explored: bool,
     block_view: bool,
-    walkable: bool
+    walkable: bool,
 }
 
 impl TileInfo {
-    pub fn new(x: i32, y: i32) -> TileInfo {
+    pub fn new(x: usize, y: usize, tile_type: TileType) -> TileInfo {
         TileInfo {
             x: x,
             y: y,
-            tile_type: TileType::None,
+            tile_type: tile_type,
             explored: false,
             block_view: false,
-            walkable: false
+            walkable: false,
         }
     }
 }
-
