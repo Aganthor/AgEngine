@@ -39,14 +39,14 @@ pub struct TileInfo {
 }
 
 impl TileInfo {
-    pub fn new(x: usize, y: usize, tile_type: TileType) -> TileInfo {
+    pub fn new(x: usize, y: usize, tile_type: TileType, is_walkable: bool) -> TileInfo {
         TileInfo {
             x: x,
             y: y,
             tile_type: tile_type,
             explored: false,
             block_view: false,
-            walkable: false,
+            walkable: is_walkable,
         }
     }
 }

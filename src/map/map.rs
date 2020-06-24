@@ -171,21 +171,21 @@ impl Map {
             for x in 0..self.map_size {
                 let map_value = self.map_data[y * self.map_size + x];
                 if map_value >= -1.0 && map_value < -0.25 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::DeepWater));
+                    self.level_data.push(TileInfo::new(x, y, TileType::DeepWater, false));
                 } else if map_value >= -0.25 && map_value < 0.0 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::ShallowWater));
+                    self.level_data.push(TileInfo::new(x, y, TileType::ShallowWater, false));
                 } else if map_value >= 0.0 && map_value < 0.0625 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Shore));
+                    self.level_data.push(TileInfo::new(x, y, TileType::Shore, true));
                 } else if map_value >= 0.0625 && map_value < 0.1250 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Sand));
+                    self.level_data.push(TileInfo::new(x, y, TileType::Sand, true));
                 } else if map_value >= 0.1250 && map_value < 0.3750 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Grass));
+                    self.level_data.push(TileInfo::new(x, y, TileType::Grass, true));
                 } else if map_value >= 0.3750 && map_value < 0.75 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Dirt));
+                    self.level_data.push(TileInfo::new(x, y, TileType::Dirt, true));
                 } else if map_value >= 0.75 && map_value < 1.0 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Rock));
+                    self.level_data.push(TileInfo::new(x, y, TileType::Rock, false));
                 } else {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Snow));
+                    self.level_data.push(TileInfo::new(x, y, TileType::Snow, true));
                 }
             }
         }
