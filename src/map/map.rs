@@ -231,7 +231,7 @@ impl Drawable for Map {
             let y: f32 = tileinfo.x as f32 * TILE_SIZE as f32;
             let dest = Point2::new(x, y);
 
-            graphics::draw(ctx, &self.texture_loader.textures.get(&tileinfo.tile_type), DrawParam::default().dest(dest)).unwrap();
+            graphics::draw(ctx, &self.texture_loader.textures[&tileinfo.tile_type], DrawParam::default().dest(dest)).unwrap();
         }
         Ok(())
     }
