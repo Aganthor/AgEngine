@@ -1,15 +1,18 @@
 use bmp::Image;
+use ggez::graphics;
 use ggez::graphics::{BlendMode, Color, DrawMode, DrawParam, Drawable, Rect};
-use ggez::nalgebra::Point2;
+use ggez::graphics::spritebatch::SpriteBatch;
+use ggez::nalgebra::{Point2, Vector2};
 use ggez::Context;
 use ggez::GameResult;
 use rand::prelude::*;
 use simdnoise::*;
 use std::f32::{MAX, MIN};
 
-use super::tiles::{TileInfo, TileType};
+use super::tiles::*;
+use super::textures::TextureLoader;
 
-struct MapBuilder {
+pub struct MapBuilder {
     seed: i32,
     frequency: f32,
     lacunarity: f32,
@@ -19,7 +22,7 @@ struct MapBuilder {
 }
 
 impl MapBuilder {
-    fn new() -> MapBuilder {
+    pub fn new() -> MapBuilder {
         MapBuilder {
             seed: 0,
             frequency: 0.0,
@@ -30,37 +33,37 @@ impl MapBuilder {
         }
     }
 
-    fn with_seed(mut self, seed: i32) -> MapBuilder {
+    pub fn with_seed(mut self, seed: i32) -> MapBuilder {
         self.seed = seed;
         self
     }
 
-    fn with_frequency(mut self, freq: f32) -> MapBuilder {
+    pub fn with_frequency(mut self, freq: f32) -> MapBuilder {
         self.frequency = freq;
         self
     }
 
-    fn with_lacunarity(mut self, lacunarity: f32) -> MapBuilder {
+    pub fn with_lacunarity(mut self, lacunarity: f32) -> MapBuilder {
         self.lacunarity = lacunarity;
         self
     }
 
-    fn with_gain(mut self, gain: f32) -> MapBuilder {
+    pub fn with_gain(mut self, gain: f32) -> MapBuilder {
         self.gain = gain;
         self
     }
 
-    fn with_octaves(mut self, octaves: u8) -> MapBuilder {
+    pub fn with_octaves(mut self, octaves: u8) -> MapBuilder {
         self.octaves = octaves;
         self
     }
 
-    fn with_size(mut self, size: usize) -> MapBuilder {
+    pub fn with_size(mut self, size: usize) -> MapBuilder {
         self.map_size = size;
         self
     }
 
-    fn build(&self) -> Map {
+    pub fn build(&self) -> Map {
         let mut map_data: Vec<f32> = Vec::new();
         map_data.resize(self.map_size * self.map_size, 0.0);
         Map {
@@ -76,6 +79,7 @@ impl MapBuilder {
             map_size: self.map_size,
             offset: Point2::new(self.map_size as f32 / 2.0, self.map_size as f32 / 2.0),
             level_data: Vec::new(),
+            texture_loader: TextureLoader::new()
         }
     }
 }
@@ -94,10 +98,11 @@ pub struct Map {
     map_size: usize,
     offset: Point2<f32>,
     level_data: Vec<TileInfo>,
+    texture_loader: TextureLoader,
 }
 
 impl Map {
-    pub fn generate_map(&mut self) {
+    pub fn generate_noise_map(&mut self) {
         self.noise_vector = NoiseBuilder::fbm_2d(self.map_size, self.map_size)
             .with_seed(self.noise_seed)
             .with_freq(self.noise_frequency)
@@ -118,8 +123,8 @@ impl Map {
 
         for i in 0..self.noise_octaves as usize {
             //rng.gen_range(-10.0, 10.0);
-            let mut offset_x = rng.gen_range(-10000.0, 10000.0) + self.offset.x;
-            let mut offset_y = rng.gen_range(-10000.0, 10000.0) + self.offset.y;
+            let offset_x = rng.gen_range(-10000.0, 10000.0) + self.offset.x;
+            let offset_y = rng.gen_range(-10000.0, 10000.0) + self.offset.y;
             octave_offsets[i].x = offset_x;
             octave_offsets[i].y = offset_y;
         }
@@ -164,6 +169,10 @@ impl Map {
                 self.map_data[y * self.map_size + x] = inverselerp(min_noise_height, max_noise_height, self.map_data[y * self.map_size + x]);
             }
         }
+    }
+
+    pub fn prepare_textures(&mut self, ctx: &mut Context) {
+        self.texture_loader.load_textures(ctx);
     }
 
     pub fn generate_level(&mut self) {
@@ -217,7 +226,13 @@ fn inverselerp(x: f32, y: f32, value: f32) -> f32 {
 
 impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
+        for tileinfo in &self.level_data {
+            let x: f32 = tileinfo.x as f32 * TILE_SIZE as f32;
+            let y: f32 = tileinfo.x as f32 * TILE_SIZE as f32;
+            let dest = Point2::new(x, y);
 
+            graphics::draw(ctx, &self.texture_loader.textures.get(&tileinfo.tile_type), DrawParam::default().dest(dest)).unwrap();
+        }
         Ok(())
     }
 

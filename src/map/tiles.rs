@@ -30,12 +30,12 @@ impl From<&str> for TileType {
 }
 
 pub struct TileInfo {
-    x: usize,
-    y: usize,
-    tile_type: TileType,
-    explored: bool,
-    block_view: bool,
-    walkable: bool,
+    pub x: usize,
+    pub y: usize,
+    pub tile_type: TileType,
+    pub explored: bool,
+    pub block_view: bool,
+    pub walkable: bool,
 }
 
 impl TileInfo {

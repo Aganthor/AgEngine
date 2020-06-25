@@ -9,13 +9,30 @@ use std::env;
 use std::path;
 
 mod map;
-use map::map::Map;
+use map::map::{Map, MapBuilder};
 
-struct MyGame {}
+struct MyGame {
+    world_map: Map
+}
 
 impl MyGame {
     fn new(ctx: &mut Context) -> MyGame {
-        MyGame {}
+        let mut map = MapBuilder::new()
+            .with_seed(192384)
+            .with_frequency(0.03)
+            .with_gain(2.5)
+            .with_lacunarity(0.55)
+            .with_octaves(2)
+            .with_size(20)
+            .build();
+
+        map.generate_noise_map();
+        map.prepare_textures(ctx);
+        map.generate_level();
+
+        MyGame {
+            world_map: map
+        }
     }
 }
 
@@ -26,6 +43,8 @@ impl EventHandler for MyGame {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::WHITE);
+
+        graphics::draw(ctx, &self.world_map, DrawParam::default()).unwrap();
 
         graphics::present(ctx)
     }
