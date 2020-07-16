@@ -22,8 +22,7 @@ impl TextureLoader {
             let mut filename = item.into_os_string().into_string().unwrap();
             let texture = graphics::Image::new(ctx, filename.to_string().clone()).unwrap();
             filename.retain(|c| c != '/');
-            self.textures
-                .insert(tiles::TileType::from(filename.as_str()), texture);
+            self.textures.insert(tiles::TileType::from(filename.as_str()), texture);
         }
     }
 }

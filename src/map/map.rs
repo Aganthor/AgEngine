@@ -115,7 +115,7 @@ impl Map {
         .with_gain(2.5)
         .with_octaves(2)
         .generate_scaled(0.0, 1.0);*/
-
+/*
         let mut rng = thread_rng();
 
         let mut octave_offsets: Vec<Point2<f32>> = Vec::new();
@@ -166,9 +166,12 @@ impl Map {
 
         for y in 0..self.map_size {
             for x in 0..self.map_size {
-                self.map_data[y * self.map_size + x] = inverselerp(min_noise_height, max_noise_height, self.map_data[y * self.map_size + x]);
+                //self.map_data[y * self.map_size + x] = inverselerp(min_noise_height, max_noise_height, self.map_data[y * self.map_size + x]);
+                self.map_data[y * self.map_size + x] = self.noise_vector[y * self.map_size + x];
             }
         }
+        */
+        //self.map_data.extend(self.noise_vector.iter().copied());
     }
 
     pub fn prepare_textures(&mut self, ctx: &mut Context) {
@@ -178,23 +181,25 @@ impl Map {
     pub fn generate_level(&mut self) {
         for y in 0..self.map_size {
             for x in 0..self.map_size {
-                let map_value = self.map_data[y * self.map_size + x];
+                let map_value = self.noise_vector[y * self.map_size + x];
+                let tile_x_pos = x * TILE_SIZE as usize;
+                let tile_y_pos = y * TILE_SIZE as usize;
                 if map_value >= -1.0 && map_value < -0.25 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::DeepWater, false));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::DeepWater, false));
                 } else if map_value >= -0.25 && map_value < 0.0 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::ShallowWater, false));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::ShallowWater, false));
                 } else if map_value >= 0.0 && map_value < 0.0625 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Shore, true));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Shore, true));
                 } else if map_value >= 0.0625 && map_value < 0.1250 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Sand, true));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Sand, true));
                 } else if map_value >= 0.1250 && map_value < 0.3750 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Grass, true));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Grass, true));
                 } else if map_value >= 0.3750 && map_value < 0.75 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Dirt, true));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Dirt, true));
                 } else if map_value >= 0.75 && map_value < 1.0 {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Rock, false));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Rock, false));
                 } else {
-                    self.level_data.push(TileInfo::new(x, y, TileType::Snow, true));
+                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Snow, true));
                 }
             }
         }
@@ -227,9 +232,7 @@ fn inverselerp(x: f32, y: f32, value: f32) -> f32 {
 impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
         for tileinfo in &self.level_data {
-            let x: f32 = tileinfo.x as f32 * TILE_SIZE as f32;
-            let y: f32 = tileinfo.x as f32 * TILE_SIZE as f32;
-            let dest = Point2::new(x, y);
+            let dest = Point2::new(tileinfo.x as f32, tileinfo.y as f32);
 
             graphics::draw(ctx, &self.texture_loader.textures[&tileinfo.tile_type], DrawParam::default().dest(dest)).unwrap();
         }

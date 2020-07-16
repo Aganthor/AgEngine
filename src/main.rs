@@ -18,7 +18,7 @@ struct MyGame {
 impl MyGame {
     fn new(ctx: &mut Context) -> MyGame {
         let mut map = MapBuilder::new()
-            .with_seed(192384)
+            .with_seed(1923843232)
             .with_frequency(0.03)
             .with_gain(2.5)
             .with_lacunarity(0.55)
