@@ -174,6 +174,10 @@ impl Map {
         //self.map_data.extend(self.noise_vector.iter().copied());
     }
 
+    pub fn map_max_size(&self) -> f32 {
+        self.map_size as f32 * TILE_SIZE as f32
+    }
+
     pub fn prepare_textures(&mut self, ctx: &mut Context) {
         self.texture_loader.load_textures(ctx);
     }
@@ -232,7 +236,9 @@ fn inverselerp(x: f32, y: f32, value: f32) -> f32 {
 impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
         for tileinfo in &self.level_data {
-            let dest = Point2::new(tileinfo.x as f32, tileinfo.y as f32);
+            let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
+            let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
+            let dest = Point2::new(x, y);
 
             graphics::draw(ctx, &self.texture_loader.textures[&tileinfo.tile_type], DrawParam::default().dest(dest)).unwrap();
         }
