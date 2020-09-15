@@ -220,7 +220,7 @@ impl Map {
             return TileType::Grass
         } else if map_elevation < 0.5 {
             return TileType::Forest
-        } else if map_elevation < 0.7 {
+        } else if map_elevation < 0.8 {
             return TileType::Savannah
         } else if map_elevation < 0.9 {
             return TileType::Sand
