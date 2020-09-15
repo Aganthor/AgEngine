@@ -188,24 +188,44 @@ impl Map {
                 let map_value = self.noise_vector[y * self.map_size + x];
                 let tile_x_pos = x * TILE_SIZE as usize;
                 let tile_y_pos = y * TILE_SIZE as usize;
-                if map_value >= -1.0 && map_value < -0.25 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::DeepWater, false));
-                } else if map_value >= -0.25 && map_value < 0.0 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::ShallowWater, false));
-                } else if map_value >= 0.0 && map_value < 0.0625 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Shore, true));
-                } else if map_value >= 0.0625 && map_value < 0.1250 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Sand, true));
-                } else if map_value >= 0.1250 && map_value < 0.3750 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Grass, true));
-                } else if map_value >= 0.3750 && map_value < 0.75 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Dirt, true));
-                } else if map_value >= 0.75 && map_value < 1.0 {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Rock, false));
-                } else {
-                    self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Snow, true));
-                }
+                let tile_type = self.biome(map_value);
+                self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, tile_type, false));
+                // if map_value >= -1.0 && map_value < -0.25 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::DeepWater, false));
+                // } else if map_value >= -0.25 && map_value < 0.0 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::ShallowWater, false));
+                // } else if map_value >= 0.0 && map_value < 0.0625 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Shore, true));
+                // } else if map_value >= 0.0625 && map_value < 0.1250 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Sand, true));
+                // } else if map_value >= 0.1250 && map_value < 0.3750 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Grass, true));
+                // } else if map_value >= 0.3750 && map_value < 0.75 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Dirt, true));
+                // } else if map_value >= 0.75 && map_value < 1.0 {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Rock, false));
+                // } else {
+                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Snow, true));
+                // }
             }
+        }
+    }
+
+    fn biome(&self, map_elevation: f32) -> TileType {
+        if map_elevation < 0.1 {
+            return TileType::DeepWater
+        } else if map_elevation < 0.2 {
+            return TileType::Shore
+        } else if map_elevation < 0.3 {
+            return TileType::Grass
+        } else if map_elevation < 0.5 {
+            return TileType::Forest
+        } else if map_elevation < 0.7 {
+            return TileType::Savannah
+        } else if map_elevation < 0.9 {
+            return TileType::Sand
+        } else {
+            return TileType::Rock
         }
     }
 
