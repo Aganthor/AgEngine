@@ -95,18 +95,18 @@ impl EventHandler for MyGame {
         self.keysdown.retain(|&x| x != keycode);
     }    
 
-    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, _y: f32) {
-//         if y > 0.0 {
-//             self.zoom -= 0.1;
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) {
+        if y > 0.0 {
+            self.zoom -= 0.1;
 // //            if self.zoom > MAX_ZOOM_IN {
 // //                self.zoom = MAX_ZOOM_IN;
 // //            }
-//         } else if y < 0.0 {
-//             self.zoom += 0.1;
+        } else if y < 0.0 {
+            self.zoom += 0.1;
 // //            if self.zoom < MAX_ZOOM_OUT {
 // //                self.zoom = MAX_ZOOM_OUT;
 // //            }
-//         }
+        }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
