@@ -1,6 +1,6 @@
 use ggez;
 use ggez::event::{self, EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{Color, DrawMode, DrawParam};
+use ggez::graphics::{DrawParam};
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::timer;
 use ggez::{conf, graphics, Context, ContextBuilder, GameResult};
@@ -12,6 +12,9 @@ use rand::Rng;
 
 mod map;
 use map::map::{Map, MapBuilder};
+
+//const MAX_ZOOM_IN: f32 = 1.0;
+//const MAX_ZOOM_OUT: f32 = 0.3;
 
 struct MyGame {
     world_map: Map,
@@ -92,12 +95,18 @@ impl EventHandler for MyGame {
         self.keysdown.retain(|&x| x != keycode);
     }    
 
-    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) {
-        if y > 0.0 {
-            self.zoom -= 0.1;
-        } else if y < 0.0 {
-            self.zoom += 0.1;
-        }
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, _y: f32) {
+//         if y > 0.0 {
+//             self.zoom -= 0.1;
+// //            if self.zoom > MAX_ZOOM_IN {
+// //                self.zoom = MAX_ZOOM_IN;
+// //            }
+//         } else if y < 0.0 {
+//             self.zoom += 0.1;
+// //            if self.zoom < MAX_ZOOM_OUT {
+// //                self.zoom = MAX_ZOOM_OUT;
+// //            }
+//         }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

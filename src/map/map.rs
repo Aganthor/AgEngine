@@ -1,6 +1,6 @@
 use bmp::Image;
 use ggez::graphics;
-use ggez::graphics::{BlendMode, Color, DrawMode, DrawParam, Drawable, Rect};
+use ggez::graphics::{BlendMode, Color, DrawMode, DrawParam, Drawable, Rect, FilterMode};
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::Context;
@@ -255,6 +255,8 @@ fn inverselerp(x: f32, y: f32, value: f32) -> f32 {
 
 impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
+
+        graphics::set_default_filter(ctx, FilterMode::Nearest);
         for tileinfo in &self.level_data {
             let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
             let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
