@@ -1,6 +1,6 @@
 use bmp::Image;
 use ggez::graphics;
-use ggez::graphics::{BlendMode, Color, DrawMode, DrawParam, Drawable, Rect, FilterMode};
+use ggez::graphics::{BlendMode, Color, DrawMode, DrawParam, Drawable, Rect, FilterMode, Text};
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::Context;
@@ -79,7 +79,8 @@ impl MapBuilder {
             map_size: self.map_size,
             offset: Point2::new(self.map_size as f32 / 2.0, self.map_size as f32 / 2.0),
             level_data: Vec::new(),
-            texture_loader: TextureLoader::new()
+            texture_loader: TextureLoader::new(),
+            nb_tiles_drawn: 0,
         }
     }
 }
@@ -99,6 +100,7 @@ pub struct Map {
     offset: Point2<f32>,
     level_data: Vec<TileInfo>,
     texture_loader: TextureLoader,
+    pub nb_tiles_drawn: i32,
 }
 
 impl Map {
@@ -190,23 +192,6 @@ impl Map {
                 let tile_y_pos = y * TILE_SIZE as usize;
                 let tile_type = self.biome(map_value);
                 self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, tile_type, false));
-                // if map_value >= -1.0 && map_value < -0.25 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::DeepWater, false));
-                // } else if map_value >= -0.25 && map_value < 0.0 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::ShallowWater, false));
-                // } else if map_value >= 0.0 && map_value < 0.0625 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Shore, true));
-                // } else if map_value >= 0.0625 && map_value < 0.1250 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Sand, true));
-                // } else if map_value >= 0.1250 && map_value < 0.3750 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Grass, true));
-                // } else if map_value >= 0.3750 && map_value < 0.75 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Dirt, true));
-                // } else if map_value >= 0.75 && map_value < 1.0 {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Rock, false));
-                // } else {
-                //     self.level_data.push(TileInfo::new(tile_x_pos, tile_y_pos, TileType::Snow, true));
-                // }
             }
         }
     }
@@ -224,8 +209,10 @@ impl Map {
             return TileType::Savannah
         } else if map_elevation < 0.9 {
             return TileType::Sand
-        } else {
+        } else if map_elevation < 0.95 {
             return TileType::Rock
+        } else {
+            return TileType::Mountain
         }
     }
 
@@ -249,25 +236,28 @@ impl Map {
 }
 
 #[inline]
+#[allow(dead_code)]
 fn inverselerp(x: f32, y: f32, value: f32) -> f32 {
     (value - x) / (y - x)
 }
 
 impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
-
         graphics::set_default_filter(ctx, FilterMode::Nearest);
+        println!("Offset is {},{}", param.offset.x, param.offset.y);
         for tileinfo in &self.level_data {
             let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
             let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
             let dest = Point2::new(x, y);
 
-            graphics::draw(ctx, &self.texture_loader.textures[&tileinfo.tile_type], DrawParam::default().dest(dest)).unwrap();
+            graphics::draw(ctx, 
+                &self.texture_loader.textures[&tileinfo.tile_type], 
+                DrawParam::default().dest(dest)).unwrap();
         }
         Ok(())
     }
 
-    fn dimensions(&self, ctx: &mut Context) -> Option<Rect> {
+    fn dimensions(&self, _ctx: &mut Context) -> Option<Rect> {
         Some(Rect::new(
             0.0,
             0.0,
@@ -276,7 +266,7 @@ impl Drawable for Map {
         ))
     }
 
-    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {}
+    fn set_blend_mode(&mut self, _mode: Option<BlendMode>) {}
 
     fn blend_mode(&self) -> Option<BlendMode> {
         Some(BlendMode::Alpha)
