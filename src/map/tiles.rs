@@ -12,6 +12,7 @@ pub enum TileType {
     ShallowWater,
     Shore,
     Snow,
+    Mountain,
     None,
 }
 
@@ -28,6 +29,7 @@ impl From<&str> for TileType {
             "shallow_water.png" => TileType::ShallowWater,
             "shore.png" => TileType::Shore,
             "snow.png" => TileType::Snow,
+            "mountain.png" => TileType::Mountain,
             _ => TileType::None,
         }
     }
