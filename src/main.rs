@@ -1,6 +1,6 @@
 use ggez;
 use ggez::event::{self, EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{DrawParam, Text};
+use ggez::graphics::{DrawParam};
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::timer;
 use ggez::{conf, graphics, Context, ContextBuilder, GameResult};
@@ -82,7 +82,7 @@ impl EventHandler for MyGame {
                 self.origin.y = self.world_map.map_max_size();
             }            
         }
-        println!("Origin.x = {}, origin.y = {}", self.origin.x, self.origin.y);
+
         Ok(())
     }
 
@@ -117,10 +117,6 @@ impl EventHandler for MyGame {
             .offset(Point2::new(self.origin.x, self.origin.y))
             .scale(Vector2::new(self.zoom, self.zoom))
         ).unwrap();
-
-        let message = format!("Number of tiles drawn is {}", self.world_map.nb_tiles_drawn);
-        let text = Text::new(message);
-        graphics::draw(ctx, &text, DrawParam::default().dest(Point2::new(0.0,0.0))).unwrap();
 
         graphics::present(ctx)
     }
