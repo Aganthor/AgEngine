@@ -1,6 +1,6 @@
 pub const TILE_SIZE: u32 = 32;
 
-#[derive(Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum TileType {
     DeepWater,
     Dirt,
@@ -34,7 +34,7 @@ impl From<&str> for TileType {
         }
     }
 }
-
+#[derive(Debug, Copy, Clone)]
 pub struct TileInfo {
     pub x: usize,
     pub y: usize,
