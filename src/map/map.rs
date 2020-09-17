@@ -214,7 +214,7 @@ impl Map {
         }
     }
 
-    pub fn get_tileinfo_at(self, x: usize, y: usize) -> TileInfo {
+    pub fn get_tileinfo_at(&self, x: usize, y: usize) -> TileInfo {
         self.level_data[x * self.map_size + y as usize]
     }
 
@@ -255,16 +255,34 @@ impl Drawable for Map {
         //Get the window size... so we can take the right number of tiles.
         let window = graphics::window(ctx);
         let window_size = window.get_inner_size().unwrap();
-        let tiles_to_take = window_size.width / TILE_SIZE as f64 + window_size.height / TILE_SIZE as f64;
-        let tiles_to_skip: f32 = param.offset.x / 32 as f32 + param.offset.y / 32 as f32;
+        //let tiles_to_take = window_size.width / TILE_SIZE as f64 + window_size.height / TILE_SIZE as f64;
+        let tiles_skip_x: usize = param.offset.x as usize / 32;
+        let tiles_skip_y: usize = param.offset.y as usize / 32;
 
-        println!("Number of tiles to skip = {}, number of tiles to take {}", tiles_to_skip, tiles_to_take);
+        //println!("Number of tiles to skip = {}, number of tiles to take {}", tiles_to_skip, tiles_to_take);
 
+        let mut nb_tiles_drawn = 0;
+
+        for y in tiles_skip_y..self.map_size {
+            for x in tiles_skip_x..self.map_size {
+                let tileinfo = self.get_tileinfo_at(x, y);
+                let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
+                let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
+                let dest = Point2::new(x, y);
+    
+                graphics::draw(ctx, 
+                    &self.texture_loader.textures[&tileinfo.tile_type], 
+                    DrawParam::default().dest(dest)).unwrap();
+    
+                nb_tiles_drawn += 1;                
+            }
+        }
+/*
         let tile_iter = self.level_data.iter()
             .skip(tiles_to_skip as usize)
             .take(tiles_to_take as usize);
 
-        let mut nb_tiles_drawn = 0;
+        
         for tileinfo in tile_iter {
             let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
             let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
@@ -275,7 +293,7 @@ impl Drawable for Map {
                 DrawParam::default().dest(dest)).unwrap();
 
             nb_tiles_drawn += 1;
-        }
+        }*/
 
         message = format!("Number of tiles drawn is {}", nb_tiles_drawn);
         graphics::draw(ctx, 
