@@ -12,6 +12,8 @@ use rand::Rng;
 
 mod map;
 use map::map::{Map, MapBuilder};
+use map::tiles;
+
 
 //const MAX_ZOOM_IN: f32 = 1.0;
 //const MAX_ZOOM_OUT: f32 = 0.3;
@@ -70,16 +72,18 @@ impl EventHandler for MyGame {
                     self.origin.x += SCROLL_SIZE;
                 }
             }
-            
+            let window = graphics::window(ctx);
+            let window_size = window.get_inner_size().unwrap();
+
             if self.origin.x < 0.0 {
                 self.origin.x = 0.0;
-            } else if self.origin.x > self.world_map.map_max_size() {
-                self.origin.x = self.world_map.map_max_size();
+            } else if self.origin.x > self.world_map.map_max_size() - window_size.width as f32 {
+                self.origin.x = self.world_map.map_max_size() - window_size.width as f32 - SCROLL_SIZE;
             }
             if self.origin.y < 0.0 {
                 self.origin.y = 0.0;
-            } else if self.origin.y > self.world_map.map_max_size() {
-                self.origin.y = self.world_map.map_max_size();
+            } else if self.origin.y > self.world_map.map_max_size() - window_size.height as f32 {
+                self.origin.y = self.world_map.map_max_size() - window_size.height as f32 - SCROLL_SIZE;
             }            
         }
 

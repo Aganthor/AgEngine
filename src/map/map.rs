@@ -95,7 +95,7 @@ pub struct Map {
     noise_octaves: u8,
     noise_scale: f32,
     noise_persistance: f32,
-    map_size: usize,
+    pub map_size: usize,
     offset: Point2<f32>,
     level_data: Vec<TileInfo>,
     texture_loader: TextureLoader,
@@ -215,7 +215,7 @@ impl Map {
     }
 
     pub fn get_tileinfo_at(&self, x: usize, y: usize) -> TileInfo {
-        self.level_data[x * self.map_size + y as usize]
+        self.level_data[y * self.map_size + x as usize]
     }
 
     #[allow(dead_code)]
@@ -247,28 +247,30 @@ impl Drawable for Map {
     fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
         graphics::set_default_filter(ctx, FilterMode::Nearest);
 
-        let mut message = format!("Offset is {},{}", param.offset.x, param.offset.y);
-        graphics::draw(ctx, 
-            &Text::new(message), 
-            DrawParam::default().dest(Point2::new(0.0, 0.0))).unwrap();
-
         //Get the window size... so we can take the right number of tiles.
         let window = graphics::window(ctx);
         let window_size = window.get_inner_size().unwrap();
-        //let tiles_to_take = window_size.width / TILE_SIZE as f64 + window_size.height / TILE_SIZE as f64;
         let tiles_skip_x: usize = param.offset.x as usize / 32;
         let tiles_skip_y: usize = param.offset.y as usize / 32;
+        let mut max_tiles_x = (window_size.width / TILE_SIZE as f64) as usize + tiles_skip_x;
+        let mut max_tiles_y = (window_size.height / TILE_SIZE as f64) as usize + tiles_skip_y;
 
-        //println!("Number of tiles to skip = {}, number of tiles to take {}", tiles_to_skip, tiles_to_take);
+        if max_tiles_x >= self.map_size as usize {
+            max_tiles_x = self.map_size as usize - 1;
+        }
+
+        if max_tiles_y >= self.map_size as usize {
+            max_tiles_y = self.map_size as usize - 1;
+        }
 
         let mut nb_tiles_drawn = 0;
 
-        for y in tiles_skip_y..self.map_size {
-            for x in tiles_skip_x..self.map_size {
+        for y in tiles_skip_y..max_tiles_y as usize {
+            for x in tiles_skip_x..max_tiles_x as usize {
                 let tileinfo = self.get_tileinfo_at(x, y);
-                let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
-                let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
-                let dest = Point2::new(x, y);
+                let tile_x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
+                let tile_y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
+                let dest = Point2::new(tile_x, tile_y);
     
                 graphics::draw(ctx, 
                     &self.texture_loader.textures[&tileinfo.tile_type], 
@@ -277,29 +279,10 @@ impl Drawable for Map {
                 nb_tiles_drawn += 1;                
             }
         }
-/*
-        let tile_iter = self.level_data.iter()
-            .skip(tiles_to_skip as usize)
-            .take(tiles_to_take as usize);
 
-        
-        for tileinfo in tile_iter {
-            let x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
-            let y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
-            let dest = Point2::new(x, y);
-
-            graphics::draw(ctx, 
-                &self.texture_loader.textures[&tileinfo.tile_type], 
-                DrawParam::default().dest(dest)).unwrap();
-
-            nb_tiles_drawn += 1;
-        }*/
-
-        message = format!("Number of tiles drawn is {}", nb_tiles_drawn);
-        graphics::draw(ctx, 
-            &Text::new(message), 
-            DrawParam::default().dest(Point2::new(0.0, 50.0))).unwrap();
-            
+        let message = format!("Offset is {},{} and tiles drawn = {}", param.offset.x, param.offset.y, nb_tiles_drawn);
+        graphics::window(ctx).set_title(&message);
+           
         Ok(())
     }
 
