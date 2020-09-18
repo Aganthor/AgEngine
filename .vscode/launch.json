@@ -5,41 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "name": "(Windows) Lancer",
+            "type": "cppvsdbg",
             "request": "launch",
-            "name": "Debug executable 'agengine'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=agengine",
-                    "--package=agengine"
-                ],
-                "filter": {
-                    "name": "agengine",
-                    "kind": "bin"
-                }
-            },
+            "program": "${workspaceFolder}/target/debug/agengine.exe",
             "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'agengine'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=agengine",
-                    "--package=mineagenginecraft"
-                ],
-                "filter": {
-                    "name": "agengine",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false
         }
     ]
 }
