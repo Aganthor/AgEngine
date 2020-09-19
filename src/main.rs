@@ -129,10 +129,10 @@ impl EventHandler for MyGame {
 fn main() {
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MAINFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
-        path.push("assets/tiles");
+        path.push("assets");
         path
     } else {
-        path::PathBuf::from("./assets/tiles")
+        path::PathBuf::from("./assets")
     };
 
     let (mut ctx, mut event_loop) = ContextBuilder::new("AgEngine", "Luc Bergeron")
