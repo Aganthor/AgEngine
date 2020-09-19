@@ -12,7 +12,9 @@ use rand::Rng;
 
 mod map;
 use map::map::{Map, MapBuilder};
-use map::tiles;
+
+mod ecs;
+use ecs::components;
 
 
 //const MAX_ZOOM_IN: f32 = 1.0;
