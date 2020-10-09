@@ -74,6 +74,11 @@ impl EventHandler for MyGame {
                     self.origin.x += SCROLL_SIZE;
                 }
             }
+
+            if ggez::input::keyboard::is_key_pressed(ctx, KeyCode::Escape) {
+                
+            }
+
             let window = graphics::window(ctx);
             let window_size = window.get_inner_size().unwrap();
 
@@ -91,6 +96,18 @@ impl EventHandler for MyGame {
 
         Ok(())
     }
+
+    // fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+
+    //     // for keycode in &self.keysdown {
+    //     //     if keycode == &KeyCode::Escape {
+    //     //         println!("Escape key pressed. Exiting.");
+    //     //         return false;
+    //     //     }
+    //     // }
+
+    //     false
+    // }
 
     fn key_down_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _keymode: KeyMods, _repeat: bool) {
         self.keysdown.push(keycode);
