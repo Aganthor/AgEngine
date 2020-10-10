@@ -271,18 +271,18 @@ impl Drawable for Map {
                 let tile_x = (tileinfo.x as f32 - param.offset.x) * param.scale.x;
                 let tile_y = (tileinfo.y as f32 - param.offset.y) * param.scale.x;
                 let dest = Point2::new(tile_x, tile_y);
-    
-                graphics::draw(ctx, 
-                    &self.texture_loader.textures[&tileinfo.tile_type], 
+
+                graphics::draw(ctx,
+                    &self.texture_loader.textures[&tileinfo.tile_type],
                     DrawParam::default().dest(dest)).unwrap();
-    
-                nb_tiles_drawn += 1;                
+
+                nb_tiles_drawn += 1;
             }
         }
 
         let message = format!("Offset is {},{} and tiles drawn = {}", param.offset.x, param.offset.y, nb_tiles_drawn);
         graphics::window(ctx).set_title(&message);
-           
+
         Ok(())
     }
 
